@@ -1,0 +1,20 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/fdm-core",
+    "crates/fdm-batch",
+    "crates/fdm-http",
+    "crates/fdm-hls",
+    "crates/fdm-bt",
+    "crates/fdm-media",
+    "crates/fdm-ipc",
+    "crates/fdm-native-host",
+    "crates/fdm-cli",
+    "crates/fdm-gui",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+authors = ["Ferrite DM Contributors"]

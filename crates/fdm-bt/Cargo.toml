@@ -1,0 +1,19 @@
+[package]
+name = "fdm-bt"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = "1"
+base64 = "0.22"
+chrono = { version = "0.4", features = ["serde"] }
+fdm-core = { path = "../fdm-core" }
+fdm-http = { path = "../fdm-http" }
+hex = "0.4"
+librqbit = { version = "9.1", default-features = false, features = ["rust-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha1 = "0.10"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+url = "2"

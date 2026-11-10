@@ -1,0 +1,21 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+
+# macOS / editor metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Runtime state, databases, logs, and local scratch exports
+ferrite-data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+*.log
+*.zip

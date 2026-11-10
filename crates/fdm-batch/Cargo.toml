@@ -1,0 +1,9 @@
+[package]
+name = "fdm-batch"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = "1"
+regex = "1"
+url = "2"

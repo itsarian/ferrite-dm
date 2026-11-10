@@ -1,0 +1,23 @@
+[package]
+name = "fdm-hls"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+aes = "0.8"
+anyhow = "1"
+cbc = "0.1"
+chrono = { version = "0.4", features = ["serde"] }
+fdm-core = { path = "../fdm-core" }
+fdm-http = { path = "../fdm-http" }
+hex = "0.4"
+m3u8-rs = "6.0"
+reqwest = { version = "0.13", default-features = false, features = ["rustls-no-provider", "http2", "stream", "gzip", "deflate"] }
+roxmltree = "0.20"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+url = "2"
+
+[dev-dependencies]
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }

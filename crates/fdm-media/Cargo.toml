@@ -1,0 +1,18 @@
+[package]
+name = "fdm-media"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = "1"
+boa_engine = "0.22"
+chrono = { version = "0.4", features = ["serde"] }
+fdm-core = { path = "../fdm-core" }
+fdm-hls = { path = "../fdm-hls" }
+fdm-http = { path = "../fdm-http" }
+reqwest = { version = "0.13", default-features = false, features = ["rustls-no-provider", "http2", "stream", "gzip", "deflate"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+url = "2"

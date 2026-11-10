@@ -1,0 +1,18 @@
+[package]
+name = "fdm-native-host"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "ferrite-native-host"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0"
+directories = "6"
+fdm-core = { path = "../fdm-core" }
+fdm-ipc = { path = "../fdm-ipc" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.47", features = ["full"] }
+url = "2.5"
