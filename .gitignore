@@ -1,6 +1,10 @@
 # Rust build artifacts
 /target/
+/dist/
 **/*.rs.bk
+
+# Generated iconsets
+resources/Ferrite.iconset/
 
 # macOS / editor metadata
 .DS_Store

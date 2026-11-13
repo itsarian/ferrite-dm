@@ -1,0 +1,15 @@
+#!/bin/bash
+# Post-install script for Ferrite DM
+
+APP_PATH="/Applications/Ferrite DM.app"
+BIN_DIR="/usr/local/bin"
+
+if [ -d "$APP_PATH" ]; then
+    mkdir -p "$BIN_DIR" 2>/dev/null || true
+    if [ -w "$BIN_DIR" ]; then
+        ln -sf "$APP_PATH/Contents/MacOS/ferrite-dm" "$BIN_DIR/ferrite-dm"
+        ln -sf "$APP_PATH/Contents/MacOS/ferrite-native-host" "$BIN_DIR/ferrite-native-host"
+    fi
+fi
+
+exit 0

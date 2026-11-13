@@ -60,6 +60,24 @@ Compiled binaries are placed together in `target/release/`:
 - `target/release/ferrite-dm` — CLI client and headless daemon
 - `target/release/ferrite-native-host` — Browser native messaging host
 
+### Packaging Install Binaries (macOS)
+
+To build macOS install packages (`.app` application bundle, mountable `.dmg`, `.pkg` system installer, and standalone `.tar.gz` with install script):
+
+```bash
+# Build release binaries and generate all install packages in dist/
+./scripts/package-macos.sh
+
+# Or reuse existing target/release binaries without recompiling:
+./scripts/package-macos.sh --skip-build
+```
+
+Generated packages are placed in `dist/`:
+- `dist/Ferrite DM.app` — Standalone macOS app bundle (signed ad-hoc with `org.ferritedm.FerriteDM`, Retina icon, and registered `magnet:`, `fdm:`, and `.torrent` handlers)
+- `dist/Ferrite-DM-<version>-macos-<arch>.dmg` — Apple Disk Image with drag-and-drop `/Applications` installer
+- `dist/Ferrite-DM-<version>-macos-<arch>.pkg` — System installer (installs app to `/Applications` and symlinks CLI tools to `/usr/local/bin`)
+- `dist/ferrite-dm-<version>-macos-<arch>.tar.gz` — Standalone portable archive with `install.sh` and `uninstall.sh`
+
 ### Installing Into Your `PATH`
 
 Copy or symlink all three binaries into the **same** directory on your `PATH` (for example `/usr/local/bin` or `~/.local/bin`):
