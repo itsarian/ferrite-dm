@@ -88,7 +88,7 @@ jobs:
           cp target/release/ferrite-native-host "$STAGE/"
           cp scripts/install-cli.sh "$STAGE/install.sh"
           cp scripts/uninstall-cli.sh "$STAGE/uninstall.sh"
-          cp README.md "$STAGE/"
+          cp README.md "$STAGE/" 2>/dev/null || true
           cp LICENSE-MIT "$STAGE/" 2>/dev/null || true
           
           chmod +x "$STAGE/install.sh" "$STAGE/uninstall.sh" "$STAGE/ferrite-dm" "$STAGE/ferrite-native-host"

@@ -152,7 +152,7 @@ cp "target/release/ferrite-dm" "$TAR_STAGE/"
 cp "target/release/ferrite-native-host" "$TAR_STAGE/"
 cp "$SCRIPT_DIR/install-cli.sh" "$TAR_STAGE/install.sh"
 cp "$SCRIPT_DIR/uninstall-cli.sh" "$TAR_STAGE/uninstall.sh"
-cp "$ROOT_DIR/README.md" "$TAR_STAGE/"
+cp "$ROOT_DIR/README.md" "$TAR_STAGE/" 2>/dev/null || true
 cp "$ROOT_DIR/LICENSE-MIT" "$TAR_STAGE/" 2>/dev/null || true
 
 chmod +x "$TAR_STAGE/install.sh" "$TAR_STAGE/uninstall.sh" "$TAR_STAGE/fdm-gui" "$TAR_STAGE/ferrite-dm" "$TAR_STAGE/ferrite-native-host"
