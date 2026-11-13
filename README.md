@@ -100,27 +100,11 @@ Unlike traditional download managers that bundle web runtimes or embed tracking 
 
 ## Screenshots & Demo
 
-The desktop interface pairs a responsive download table with a detailed diagnostic inspector:
+<div align="center">
+  <img src="resources/screenshot.png" alt="Ferrite DM Desktop Interface" width="100%" />
+</div>
 
-```
-+---------------------------------------------------------------------------------------+
-|  Ferrite DM     [All] [Downloading] [Completed] [Paused]             [Q Search]  (TUM) |
-+---------------------------------------------------------------------------------------+
-|  ID   Name                     Progress         Size         Speed        Status      |
-|  #1   ubuntu-24.04.iso         =========>-- 72% 2.8 GB       18.4 MB/s    Downloading |
-|  #2   archive-dataset.tar.gz   ============ 100% 840 MB      -            Completed   |
-|  #3   sample-stream.m3u8       ===>-------- 34% 180 MB       2.1 MB/s     Downloading |
-+---------------------------------------------------------------------------------------+
-|  [GENERAL]  [DETAILS]  [FILES]  [PROGRESS]  [CONNECTIONS]  [SPEED]                    |
-|  -----------------------------------------------------------------------------------  |
-|  Target File:  /Users/user/Downloads/ubuntu-24.04.iso                                 |
-|  Chunk Map:    [■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■□□□□□□□□□□□□□]     |
-|  Active Peers: 14 connections (3 mirrors, 11 BitTorrent swarm peers)                  |
-|  Throughput:   ↓ 18.4 MB/s  |  ↑ 1.2 MB/s  |  ETA: 48s                                |
-+---------------------------------------------------------------------------------------+
-```
-
-*(Visual desktop screenshots can be reviewed directly in the [resources/](resources/) directory, which contains application icon assets and bundle branding).*
+The desktop interface pairs a responsive download table with a 6-tab diagnostic inspector (`GENERAL`, `DETAILS`, `FILES`, `PROGRESS`, `CONNECTIONS`, and `SPEED`) providing real-time transfer throughput, mirror states, and visual chunk completion maps.
 
 ---
 
