@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": "skills/create-readme/SKILL.md",
       "computedHash": "59e7a20cc6e183f31c0161a619b66f96d05656378c1cef886522b6845d33c953"
+    },
+    "readme-optimization": {
+      "source": "samber/developer-relations-skills",
+      "sourceType": "github",
+      "skillPath": "skills/readme-optimization/SKILL.md",
+      "computedHash": "ec3e32814dc730884e1888d471dd663dbe35791963f16b04390530fd4f6e30db"
     }
   }
 }

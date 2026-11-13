@@ -5,162 +5,140 @@
 
   *Fast, telemetry-free, modern desktop and CLI download manager built in Rust*
 
+  [![Release](https://img.shields.io/github/v/release/itsarian/ferrite-dm?style=flat-square)](https://github.com/itsarian/ferrite-dm/releases)
   [![Build Status](https://img.shields.io/github/actions/workflow/status/itsarian/ferrite-dm/ci.yml?style=flat-square)](https://github.com/itsarian/ferrite-dm/actions)
-  [![Release](https://img.shields.io/github/v/release/itsarian/ferrite-dm?include_prereleases&style=flat-square)](https://github.com/itsarian/ferrite-dm/releases)
-  [![Rust Version](https://img.shields.io/badge/Rust-2024%20edition-orange?style=flat-square)](Cargo.toml)
-  [![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux-lightgrey?style=flat-square)](#platform-support)
+  [![Licence](https://img.shields.io/badge/licence-MIT%20%2F%20Apache--2.0-blue?style=flat-square)](#licence)
+  [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey?style=flat-square)](#platform-support)
 
-  [Features](#features) • [Platform Support](#platform-support) • [Quick Start](#quick-start) • [Installation](#installation) • [Desktop App](#desktop-app-fdm-gui) • [CLI Usage](#cli-usage-ferrite-dm) • [Browser Integration](#browser-integration) • [Architecture](#architecture)
+  [Overview](#overview) • [Why Ferrite](#why-ferrite-dm) • [Install](#install) • [Desktop App](#desktop-app) • [CLI Usage](#cli-usage) • [Platform Support](#platform-support) • [Architecture](#architecture) • [Licence](#licence)
 </div>
 
 ---
 
-Ferrite DM is a high-performance download manager built in Rust as a lightweight, local-first alternative to Free Download Manager (FDM 6.x). It combines a native GPU-accelerated desktop interface with a scriptable CLI and headless daemon sharing the same underlying download engine.
+## Overview
 
-## Features
+**Ferrite DM** is a high-performance download manager and CLI built in Rust as a local-first alternative to Free Download Manager (FDM 6.x). It pairs a native GPU-accelerated desktop interface with a scriptable CLI and background daemon sharing the same underlying download engine.
 
-- **Zero Telemetry & Local-First** — Completely private with no tracking, analytics, background phone-homes, or ads. Downloads, tags, and settings stay in a local SQLite WAL database.
-- **Multi-Protocol Engine** — Multi-connection HTTP/HTTPS/FTP with range splitting, BitTorrent and magnet links (powered by `librqbit`), and HLS (`.m3u8`) / DASH (`.mpd`) video stream extraction.
-- **Native GPUI Desktop App** — GPU-accelerated desktop interface with light and dark themes, 6 locales, real-time speed graphs, and connection inspectors.
-- **Unified CLI & Daemon** — Command-line interface and background daemon communicating over Unix domain sockets (`ferrite.sock`).
-- **Browser Extension Integration** — Drop-in Native Messaging host (`org.freedownloadmanager.fdm5.cnh`) compatible with official FDM extensions for Chromium browsers and Firefox.
-- **LAN Remote Control** — Built-in self-signed HTTPS and WebSocket web interface with QR-code pairing for local network management.
-- **Batch Wildcards & Automation** — Pattern expansion for numeric ranges (`[01-20]`), character sets (`[a-z]`), and brace lists (`{linux,macos}`).
-- **Traffic Usage Modes** — Four global throttling profiles (`snail`, `low`, `medium`, `high`) with scheduler, battery guard, and sleep prevention.
+### Project Status
 
-## Platform Support
+Actively maintained in early release (`v0.1.0`). Core transfer mechanics (HTTP/FTP, BitTorrent via `librqbit`, HLS/DASH video streams), SQLite persistence, and macOS desktop integrations are verified and tested. Linux CLI and background daemon support are fully functional; Linux GUI packaging and Windows support are in active development.
 
-| Platform | Support | Notes |
-| :--- | :--- | :--- |
-| **macOS** *(11+)* | **Full** | Native GPUI desktop app, menu bar, Dock badges, LaunchAgent autorun, sleep prevention (`caffeinate`), and system notifications. |
-| **Linux** *(x86_64)* | **Core / CLI** | Full CLI, headless daemon, Unix socket IPC, and browser Native Messaging host. *(Desktop GUI is experimental).* |
-| **Windows** | *Planned* | Transfer crates currently rely on Unix-specific file positioning (`FileExt`) and Unix domain sockets. |
+---
 
-## Quick Start
+## Why Ferrite DM?
 
-### Desktop App (macOS)
-1. Download `Ferrite-DM-*.dmg` from [Releases](https://github.com/itsarian/ferrite-dm/releases).
-2. Drag **Ferrite DM** to `/Applications` and launch.
-3. Paste any URL or magnet link with `⌘V` or press `⌘N` to add a download.
+| Requirement | Ferrite DM | Free Download Manager (FDM) | aria2 / curl |
+| :--- | :--- | :--- | :--- |
+| **Telemetry & Privacy** | **Zero telemetry** — 100% local SQLite WAL database | Proprietary telemetry, update pings, promotional prompts | None (clean) |
+| **Desktop Interface** | **Native GPUI** (sub-millisecond GPU rendering, no Electron) | Qt / embedded Chromium views | None (CLI only) |
+| **CLI & Daemon Parity** | **Shared Unix socket engine** (`ferrite.sock`) | Limited or disjointed CLI support | CLI only |
+| **Protocols** | HTTP(S), FTP, BitTorrent, HLS/DASH video streams | HTTP(S), FTP, BitTorrent, YouTube | HTTP(S), FTP, BitTorrent (aria2) |
+| **Browser Integration** | Native Messaging host compatible with official FDM extensions | Proprietary extension protocol | Requires third-party bridges |
+| **LAN Remote Control** | Built-in self-signed HTTPS + WebSocket with QR-code pairing | Proprietary cloud or LAN sync | Web-UI wrappers required |
 
-### CLI in 5 Seconds
+### When to use something else
+
+- **Need a Windows GUI today:** Ferrite DM currently leverages Unix file positioning (`FileExt`) and Unix domain sockets. Windows support is planned but not yet available.
+- **Single one-off scripts:** If you only need to download a single file in a pipeline without queue management or browser handoff, standard `curl` or `wget` is simpler.
+- **Multi-user remote seedbox:** For multi-user accounts and remote web trackers, specialized torrent daemons like `transmission-daemon` or `qbittorrent-nox` are more appropriate.
+
+---
+
+## Install
+
+### macOS
+Download signed packages from [GitHub Releases](https://github.com/itsarian/ferrite-dm/releases):
+- **`.dmg`:** Open `Ferrite-DM-<version>-macos-<arch>.dmg` and drag **Ferrite DM** to `/Applications`.
+- **`.pkg`:** Installs the app bundle and symlinks `fdm-gui`, `ferrite-dm`, and `ferrite-native-host` into `/usr/local/bin`.
+
+Or install via script:
 ```bash
-# Start a direct download (waits until finished, or queues to running daemon)
-ferrite-dm https://example.com/archive.tar.gz
-
-# Start headless background daemon
-ferrite-dm daemon
+curl -fsSL https://raw.githubusercontent.com/itsarian/ferrite-dm/main/scripts/install-cli.sh | bash
 ```
 
-### Browser Extension Setup
+### Linux (CLI & Daemon)
 ```bash
-# Register native host with all supported browsers (Chrome, Firefox, Brave, Edge)
-ferrite-dm native-host-install --browser all
-```
-
-## Installation
-
-### Pre-built Binaries
-Download release packages from [GitHub Releases](https://github.com/itsarian/ferrite-dm/releases):
-
-- **macOS:**
-  - `Ferrite-DM-<version>-macos-<arch>.dmg` — Drag-and-drop installer
-  - `Ferrite-DM-<version>-macos-<arch>.pkg` — System installer (places app in `/Applications` and symlinks CLI tools to `/usr/local/bin`)
-  - `ferrite-dm-<version>-macos-<arch>.tar.gz` — Portable archive with `install.sh`
-- **Linux:**
-  - `ferrite-dm-<version>-linux-x86_64.tar.gz` — Standalone CLI tarball with `install.sh`
-
-To install the CLI from a downloaded archive:
-```bash
-tar -xzf ferrite-dm-*-macos-arm64.tar.gz
+tar -xzf ferrite-dm-*-linux-x86_64.tar.gz
 cd ferrite-dm-*
-./install.sh
+./install.sh   # Installs ferrite-dm and ferrite-native-host to ~/.local/bin
 ```
 
 ### Building from Source
+Requires Rust Edition 2024 (`rustc >= 1.85`), a C compiler, and `cmake`:
 
-#### Prerequisites
-- Rust toolchain supporting **Edition 2024** (`rustc >= 1.85`)
-- C compiler and CMake (for bundled C dependencies)
-- macOS: Xcode Command Line Tools (`xcode-select --install`)
-- Optional: `ffmpeg` / `ffprobe` (video muxing/audio conversion), `yt-dlp` (media parsers)
-
-#### Build
 ```bash
 git clone https://github.com/itsarian/ferrite-dm.git
 cd ferrite-dm
-
-# Build all workspace binaries in release mode
 cargo build --release --workspace
-```
 
-Binaries are generated in `target/release/`:
-- `fdm-gui` — GPUI desktop interface
-- `ferrite-dm` — CLI client and background daemon
-- `ferrite-native-host` — Browser Native Messaging bridge
-
-#### Package macOS Installers
-```bash
-# Generate DMG, PKG, App Bundle, and Tarball in dist/
-./scripts/package-macos.sh
-```
-
-#### Self-Test & Verification
-```bash
-# Run offline loopback self-test
+# Verify build with the isolated offline self-test
 ./target/release/ferrite-dm self-test
-
-# Run workspace unit and integration tests
-cargo test --workspace
 ```
 
-## Desktop App (`fdm-gui`)
+---
+
+## Quick Start
+
+Verify the installation:
+
+```bash
+ferrite-dm --version
+# ferrite-dm 0.1.0
+```
+
+### 1. Download via CLI
+```bash
+# Direct download (runs until finished, or enqueues if GUI/daemon is open)
+ferrite-dm https://example.com/archive.tar.gz
+```
+
+### 2. Connect Your Web Browser
+Enable one-click download capture from official Chrome, Firefox, Brave, and Edge extensions:
+
+```bash
+ferrite-dm native-host-install --browser all
+```
+
+> [!NOTE]
+> The browser native host automatically spawns `ferrite-dm daemon` in the background if neither the GUI nor daemon is already running when a download starts.
+
+---
+
+## Desktop App
+
+Launch the GPUI desktop interface or pass a URL to pre-fill the Add modal:
 
 ```bash
 fdm-gui [OPTIONS] [URL | MAGNET | .TORRENT]
 ```
 
-### Launch Flags
-- `--hidden` — Start minimized in the background with the engine and IPC socket active.
-- `--portable` — Store database, settings, and plugins in `./ferrite-data/` beside the executable.
-- `--data-dir <DIR>` — Use a custom data directory.
-
 ### Keyboard Shortcuts
 
 | Shortcut | Action | Shortcut | Action |
 | :--- | :--- | :--- | :--- |
-| `⌘N` | Add Download | `Space` | Start / Pause download |
-| `⌘B` | Batch Download modal | `Delete` | Remove selected download(s) |
+| `⌘N` | Add URL, magnet link, or torrent | `Space` | Pause or resume selected download |
+| `⌘B` | Batch wildcard download modal | `Delete` | Remove selected download |
 | `⌘V` | Paste URL from clipboard | `⌘A` | Select all downloads |
-| `⌘F` | Focus search bar | `⌘,` | Open Preferences |
-| `⌘I` | Toggle Details Inspector | `⌘=` / `⌘-` | Zoom In / Zoom Out |
+| `⌘F` | Filter and search downloads | `⌘,` | Open Preferences |
+| `⌘I` | Toggle bottom Details Inspector | `⌘=` / `⌘-` | Zoom in / Zoom out |
 
-### Inspector Tabs (`⌘I`)
-The bottom inspector pane provides live diagnostic views:
-- **`GENERAL`** — Status, file path, download progress, and ETA.
-- **`DETAILS`** — Technical HTTP headers, ETag, MIME type, redirects, and mirrors.
-- **`FILES`** — Interactive file selection tree for multi-file torrents.
-- **`PROGRESS`** — Visual chunk and piece completion map.
-- **`CONNECTIONS`** — Active peer and connection list with transfer rates.
-- **`SPEED`** — Real-time download and upload throughput graph.
+### Inspector Views (`⌘I`)
+The bottom inspector pane provides 6 diagnostic tabs:
+- **`GENERAL`** — File location, transfer progress, total size, and estimated time remaining.
+- **`DETAILS`** — HTTP response headers, MIME type, ETag, redirect hops, and mirror fallbacks.
+- **`FILES`** — Interactive file selection tree for multi-file torrent archives.
+- **`PROGRESS`** — Visual chunk and BitTorrent piece completion map.
+- **`CONNECTIONS`** — Active socket connections, remote IP addresses, and throughput per peer.
+- **`SPEED`** — Real-time download and upload transfer graph.
 
-> [!TIP]
-> Click the **Preferences** heading 5 times to reveal hidden developer diagnostics and logging controls.
+---
 
-## CLI Usage (`ferrite-dm`)
+## CLI Usage
 
-When the GUI or daemon is running, CLI commands communicate through `ferrite.sock`. When run standalone, commands operate directly against the local SQLite database.
+When `fdm-gui` or `ferrite-dm daemon` is active, CLI commands automatically communicate over Unix domain socket `ferrite.sock`. When run standalone, commands operate directly against the local SQLite database.
 
 ```bash
-ferrite-dm [OPTIONS] [COMMAND]
-```
-
-### Basic Downloads
-```bash
-# Direct download with default settings
-ferrite-dm https://example.com/file.zip
-
-# Full download specification with mirror, headers, and destination
+# Advanced download with mirror fallback, custom filename, and priority
 ferrite-dm add "https://cdn1.example.com/installer.dmg" \
   --mirror "https://cdn2.example.com/installer.dmg" \
   --dir ~/Downloads/Installers \
@@ -168,143 +146,69 @@ ferrite-dm add "https://cdn1.example.com/installer.dmg" \
   --header "Authorization: Bearer <TOKEN>" \
   --priority high \
   --wait
-```
 
-### Torrents & Magnet Links
-```bash
-# Inspect torrent metadata without downloading
-ferrite-dm torrent ~/Downloads/linux.torrent --inspect
+# Inspect torrent metadata or download specific files sequentially
+ferrite-dm torrent ~/Downloads/sample.torrent --inspect
+ferrite-dm torrent "magnet:?xt=urn:btih:..." --select-files 0,2 --play-asap
 
-# Download specific files (0-based indices) and stream sequentially
-ferrite-dm torrent "magnet:?xt=urn:btih:..." \
-  --select-files 0,2 \
-  --play-asap \
-  --dir ~/Downloads/Linux
-```
-
-### Batch Wildcards
-```bash
-# Preview expanded URLs
-ferrite-dm batch "https://example.com/builds/v[1-3]-{linux,macos}-[a-b].tar.gz" --preview-only
-
-# Download a sequence of files
+# Batch download wildcard patterns (numeric ranges, character sets, brace lists)
 ferrite-dm batch "https://example.com/parts/part-[01-20:2].zip" --dir ~/Downloads/Parts
+ferrite-dm batch "https://example.com/builds/v[1-3]-{linux,macos}.tar.gz" --preview-only
 
-# Enqueue from a text file (one URL per line)
-ferrite-dm batch --file urls.txt --paused
-```
-
-### Queue Management
-```bash
-# List active downloads
+# Manage download queue
 ferrite-dm list
-ferrite-dm list --state downloading --json
-
-# Pause, resume, or cancel by ID
 ferrite-dm pause 1
 ferrite-dm resume 1
 ferrite-dm cancel 1
 ferrite-dm remove 1 --delete-files
 
-# Batch queue controls
-ferrite-dm start-all
-ferrite-dm pause-all
-```
+# Switch Traffic Usage Modes (TUM throttling)
+ferrite-dm tum snail    # Throttled (64 KiB/s down, 32 KiB/s up)
+ferrite-dm tum medium   # Balanced (4 MiB/s down, 1 MiB/s up)
+ferrite-dm tum high     # Unlimited bandwidth and connections
 
-### Traffic Usage Modes (TUM)
-```bash
-ferrite-dm tum snail    # Low bandwidth profile
-ferrite-dm tum high     # Unlimited profile
-```
-
-| Mode | Download Cap | Upload Cap | Max Connections (Per Server) | Active Downloads |
-| :--- | :--- | :--- | :--- | :--- |
-| `snail` | 64 KiB/s | 32 KiB/s | 4 (2) | 1 |
-| `low` | 512 KiB/s | 128 KiB/s | 12 (4) | 2 |
-| `medium` | 4 MiB/s | 1 MiB/s | 32 (8) | 4 |
-| `high` | Unlimited | Unlimited | 64 (16) | 8 |
-
-### Media & Utility Tools
-```bash
-# Verify cryptographic file hash (md5, sha1, sha256, sha512)
+# Compute and verify cryptographic digest
 ferrite-dm hash ~/Downloads/ubuntu.iso --algo sha256 --expect <HEX_DIGEST>
 
-# Convert video to MP3 via FFmpeg
+# Media remuxing and audio extraction via FFmpeg
 ferrite-dm mp3 ~/Downloads/podcast.mkv ~/Music/podcast.mp3 --bitrate 320
+ferrite-dm mp4 ~/Downloads/capture.ts ~/Videos/output.mp4
 
-# Remux or transcode video to MP4
-ferrite-dm mp4 ~/Downloads/capture.ts ~/Videos/output.mp4              # Fast remux (stream copy)
-ferrite-dm mp4 ~/Downloads/legacy.avi ~/Videos/output.mp4 --transcode  # Full transcode
-
-# Import existing Free Download Manager database
+# Import legacy Free Download Manager database
 ferrite-dm import-fdm-db ~/Library/Application\ Support/Free\ Download\ Manager/db.sqlite
 ```
 
-## Browser Integration
+---
 
-Ferrite DM implements the Free Download Manager WebExtension Native Messaging protocol (`org.freedownloadmanager.fdm5.cnh`), supporting official FDM extensions for Chrome, Firefox, Brave, Edge, Opera, and Vivaldi.
+## Platform Support
 
-```bash
-# Register native host manifest with all browsers
-ferrite-dm native-host-install --browser all
+| Operating System | Tier | Status | Notes |
+| :--- | :--- | :--- | :--- |
+| **macOS** *(11+)* | Tier 1 | **Verified / Primary** | Full GPUI desktop application, menu bar item, Dock transfer badges, LaunchAgent autorun, sleep prevention (`caffeinate`), and system notifications. |
+| **Linux** *(x86_64)* | Tier 2 | **CLI & Daemon** | Headless engine, CLI client, Unix socket IPC, and browser Native Messaging host. *(GPUI desktop packaging is experimental).* |
+| **Windows** | Tier 3 | *In Development* | File transfer and IPC crates currently require Unix domain sockets and Unix file positioning APIs. Windows port is planned. |
 
-# Or install for a specific browser
-ferrite-dm native-host-install --browser chrome
-ferrite-dm native-host-install --browser firefox
-```
-
-> [!NOTE]
-> When a download is intercepted while neither the GUI nor daemon is running, the native messaging host automatically spawns a background `ferrite-dm daemon`.
-
-## LAN Remote Control
-
-Manage downloads from any device on your local network:
-
-```bash
-ferrite-dm daemon --remote-control --remote-host 192.168.1.50
-```
-
-- **Local Web UI:** Accessible at `https://<YOUR-IP>:9443/?token=...`
-- **Zero Cloud Infrastructure:** Uses locally generated self-signed TLS certificates (`rc_cert.der` / `rc_key.der`).
-- **QR Pairing:** Prints an ASCII QR code in the terminal for instant mobile pairing.
-
-## Configuration & Paths
-
-### Default Locations
+### Default Data Paths
 - **macOS:** `~/Library/Application Support/org.ferritedm.FerriteDM`
 - **Linux:** `~/.local/share/ferritedm` (`$XDG_DATA_HOME/ferritedm`)
-- **Portable Mode:** `./ferrite-data/` beside the executable
+- **Portable Mode (`--portable`):** `./ferrite-data/` adjacent to the executable binary
 
-### Path Expansion Macros
-Templates configured in Preferences or via `--dir` support dynamic variables:
-
-| Macro | Description | Example Output |
-| :--- | :--- | :--- |
-| `%date%` | Full ISO date (`YYYY-MM-DD`) | `2026-11-13` |
-| `%year%`, `%month%`, `%day%` | Date parts | `2026`, `11`, `13` |
-| `%host%`, `%server%` | Download URL host | `releases.ubuntu.com` |
-| `%path_on_server%` | Remote server path segments | `releases/noble` |
-| `%type%` | Detected file category | `Video`, `Audio`, `Archive`, `Document` |
-| `%ext%` | Target file extension | `iso`, `dmg`, `zip` |
-
-### Environment Variables
-- `FERRITE_THEME` — Force theme (`light` or `dark`).
-- `FERRITE_UPDATE_MANIFEST_URL` — Custom update check JSON manifest. Unset by default to remain 100% offline.
+---
 
 ## Architecture
 
-Ferrite DM is organized as a modular Cargo workspace:
+Ferrite DM is structured as a modular Cargo workspace:
 
 ```
 ferrite-dm/
 ├── crates/
-│   ├── fdm-core          # SQLite persistence, rate limiting, routing, and migration
+│   ├── fdm-core          # SQLite WAL persistence, rate limiting, path routing, and migration
 │   ├── fdm-http          # Multi-connection HTTP/HTTPS/FTP transfer engine
 │   ├── fdm-bt            # BitTorrent engine (librqbit) with sequential streaming
-│   ├── fdm-hls           # HLS (.m3u8) & DASH (.mpd) segment fetcher & muxer
-│   ├── fdm-batch         # Wildcard range & brace expansion parser
+│   ├── fdm-hls           # HLS (.m3u8) & DASH (.mpd) stream fetcher and muxer
+│   ├── fdm-batch         # Wildcard range and brace expansion parser
 │   ├── fdm-media         # Boa JavaScript add-ons & FFmpeg conversion helpers
-│   ├── fdm-ipc           # Unix socket IPC and LAN Remote Control server
+│   ├── fdm-ipc           # Unix socket IPC and LAN Remote Control web server
 │   ├── fdm-native-host   # WebExtension Native Messaging protocol host
 │   ├── fdm-cli           # CLI executable and orchestration engine
 │   └── fdm-gui           # Native GPUI desktop application
@@ -312,4 +216,15 @@ ferrite-dm/
     └── ARCHITECTURE_BLUEPRINT.md  # Detailed FDM mapping & architecture specification
 ```
 
-See [ARCHITECTURE_BLUEPRINT.md](docs/ARCHITECTURE_BLUEPRINT.md) for architectural details and subsystem mappings.
+For design rationale, protocol contracts, and subsystem mappings, see [docs/ARCHITECTURE_BLUEPRINT.md](docs/ARCHITECTURE_BLUEPRINT.md).
+
+---
+
+## Licence
+
+Dual-licensed under either:
+
+- **[MIT Licence](LICENSE-MIT)**
+- **[Apache Licence, Version 2.0](LICENSE-APACHE)**
+
+at your option.
