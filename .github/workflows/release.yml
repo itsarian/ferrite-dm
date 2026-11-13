@@ -1,0 +1,110 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release Tag (e.g. v0.1.1)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    name: Build macOS Installers (Apple Silicon)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build and Package macOS Installers
+        run: |
+          chmod +x scripts/*.sh scripts/*.swift resources/pkg-scripts/*
+          ./scripts/package-macos.sh
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}
+          files: |
+            dist/*.dmg
+            dist/*.pkg
+            dist/*.zip
+            dist/*.tar.gz
+            dist/SHA256SUMS.txt
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+
+  build-linux-cli:
+    name: Build Linux CLI & Daemon (x86_64)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake pkg-config libssl-dev
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build Linux CLI Binaries
+        run: |
+          cargo build --release -p fdm-cli -p fdm-native-host
+
+      - name: Package Linux Standalone Tarball
+        run: |
+          RAW_VER="${{ github.event.inputs.tag_name || github.ref_name }}"
+          VERSION="${RAW_VER#v}"
+          if [ -z "$VERSION" ]; then
+            VERSION="0.1.0"
+          fi
+          
+          mkdir -p dist/linux-stage/ferrite-dm-${VERSION}
+          STAGE="dist/linux-stage/ferrite-dm-${VERSION}"
+          
+          cp target/release/ferrite-dm "$STAGE/"
+          cp target/release/ferrite-native-host "$STAGE/"
+          cp scripts/install-cli.sh "$STAGE/install.sh"
+          cp scripts/uninstall-cli.sh "$STAGE/uninstall.sh"
+          cp README.md "$STAGE/"
+          cp LICENSE-MIT "$STAGE/" 2>/dev/null || true
+          
+          chmod +x "$STAGE/install.sh" "$STAGE/uninstall.sh" "$STAGE/ferrite-dm" "$STAGE/ferrite-native-host"
+          
+          TAR_NAME="ferrite-dm-${VERSION}-linux-x86_64.tar.gz"
+          tar -czf "dist/$TAR_NAME" -C dist/linux-stage "ferrite-dm-${VERSION}"
+          
+          cd dist
+          shasum -a 256 "$TAR_NAME" > "${TAR_NAME}.sha256"
+
+      - name: Upload Linux Assets to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}
+          files: |
+            dist/ferrite-dm-*-linux-x86_64.tar.gz
+            dist/ferrite-dm-*-linux-x86_64.tar.gz.sha256
+          draft: false
+          prerelease: false

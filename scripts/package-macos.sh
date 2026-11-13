@@ -9,7 +9,8 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
 RESOURCES_DIR="$ROOT_DIR/resources"
 
-VERSION="0.1.0"
+RAW_VERSION="${VERSION:-${GITHUB_REF_NAME:-0.1.0}}"
+VERSION="${RAW_VERSION#v}"
 ARCH="$(uname -m)"
 SKIP_BUILD=false
 CLEAN=false
@@ -129,7 +130,15 @@ pkgbuild \
 
 rm -rf "$PKG_STAGE"
 
-# 7. Build standalone CLI / portable tarball
+# 7. Build standalone App Bundle Zip
+ZIP_NAME="Ferrite-DM-${VERSION}-macos-${ARCH}.zip"
+ZIP_PATH="$DIST_DIR/$ZIP_NAME"
+
+echo "==> Building App Bundle Zip ($ZIP_NAME)..."
+rm -f "$ZIP_PATH"
+ditto -c -k --keepParent "$APP_DIR" "$ZIP_PATH"
+
+# 8. Build standalone CLI / portable tarball
 TAR_NAME="ferrite-dm-${VERSION}-macos-${ARCH}.tar.gz"
 TAR_PATH="$DIST_DIR/$TAR_NAME"
 TAR_STAGE="$DIST_DIR/tar-stage/ferrite-dm-${VERSION}"
@@ -151,10 +160,10 @@ chmod +x "$TAR_STAGE/install.sh" "$TAR_STAGE/uninstall.sh" "$TAR_STAGE/fdm-gui" 
 tar -czf "$TAR_PATH" -C "$DIST_DIR/tar-stage" "ferrite-dm-${VERSION}"
 rm -rf "$DIST_DIR/tar-stage"
 
-# 8. Compute Checksums
+# 9. Compute Checksums
 echo "==> Generating SHA256 checksums..."
 cd "$DIST_DIR"
-shasum -a 256 "$DMG_NAME" "$PKG_NAME" "$TAR_NAME" > SHA256SUMS.txt
+shasum -a 256 "$DMG_NAME" "$PKG_NAME" "$ZIP_NAME" "$TAR_NAME" > SHA256SUMS.txt
 cd "$ROOT_DIR"
 
 echo ""

@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test & Verify
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Workspace check
+        run: cargo check --workspace
+
+      - name: Workspace tests
+        run: cargo test --workspace
+
+      - name: Verify Packaging Assets
+        run: |
+          chmod +x scripts/*.sh scripts/*.swift resources/pkg-scripts/*
+          swift scripts/generate-icon.swift resources
+          test -f resources/Ferrite.icns
+          test -f resources/Info.plist
